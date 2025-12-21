@@ -1,0 +1,71 @@
+create database netcdfweb;
+
+
+CREATE TABLE `netcdf_files` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `filename` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `filepath` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `satellite` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '위성명',
+  `sensor` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '센서명',
+  `data_level` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '데이터 레벨',
+  `variable_id` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '변수/채널 ID',
+  `region_code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '지역 코드',
+  `region_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '지역명',
+  `observation_datetime` datetime NOT NULL COMMENT '관측 시간',
+  `observation_date` date NOT NULL COMMENT '관측 날짜',
+  `observation_time` time NOT NULL COMMENT '관측 시간(시:분)',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `file_size` bigint DEFAULT NULL COMMENT '파일 크기 (bytes)',
+  `data_start` datetime DEFAULT NULL COMMENT '데이터 시작 시간',
+  `data_end` datetime DEFAULT NULL COMMENT '데이터 종료 시간',
+  `variables` text COLLATE utf8mb4_unicode_ci COMMENT '변수 목록 (JSON 형식)',
+  `dimensions` json DEFAULT NULL COMMENT '차원 정보 (JSON 형식)',
+  `global_attributes` json DEFAULT NULL COMMENT '글로벌 속성 (JSON 형식)',
+  `variable_count` int DEFAULT NULL COMMENT '변수 개수',
+  `dimension_count` int DEFAULT NULL COMMENT '차원 개수',
+  `has_coordinates` tinyint(1) DEFAULT '0' COMMENT '좌표계 정보 포함 여부',
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 시간',
+  `has_preview` tinyint(1) DEFAULT '0' COMMENT '미리보기 이미지 존재 여부',
+  `tile_generated` tinyint(1) DEFAULT '0' COMMENT '타일 생성 여부',
+  `tile_base_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '타일 저장 경로 prefix',
+  `tile_min_zoom` int DEFAULT NULL COMMENT '타일 최소 줌 레벨',
+  `tile_max_zoom` int DEFAULT NULL COMMENT '타일 최대 줌 레벨',
+  `preview_count` int DEFAULT '0' COMMENT '생성된 이미지 개수',
+  `lat_min` double DEFAULT NULL COMMENT '위도 최소값',
+  `lat_max` double DEFAULT NULL COMMENT '위도 최대값',
+  `lon_min` double DEFAULT NULL COMMENT '경도 최소값',
+  `lon_max` double DEFAULT NULL COMMENT '경도 최대값',
+  PRIMARY KEY (`id`),
+  KEY `idx_observation_datetime` (`observation_datetime`),
+  KEY `idx_satellite` (`satellite`),
+  KEY `idx_variable_id` (`variable_id`),
+  KEY `idx_region_code` (`region_code`),
+  KEY `idx_updated_at` (`updated_at`),
+  KEY `idx_file_size` (`file_size`),
+  KEY `idx_lat_min` (`lat_min`),
+  KEY `idx_lat_max` (`lat_max`),
+  KEY `idx_lon_min` (`lon_min`),
+  KEY `idx_lon_max` (`lon_max`),
+  KEY `idx_tile_generated` (`tile_generated`)
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='NetCDF 파일 메타데이터 테이블'
+
+
+
+
+CREATE TABLE `netcdf_images` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `file_id` int NOT NULL COMMENT '파일 ID (netcdf_files 테이블 참조)',
+  `image_path` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '이미지 파일 경로',
+  `image_type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'preview' COMMENT '이미지 타입 (preview, thumbnail 등)',
+  `variable_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '표시된 변수명',
+  `description` text COLLATE utf8mb4_unicode_ci COMMENT '이미지 설명',
+  `width` int DEFAULT NULL COMMENT '이미지 너비',
+  `height` int DEFAULT NULL COMMENT '이미지 높이',
+  `file_size` bigint DEFAULT NULL COMMENT '이미지 파일 크기 (bytes)',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 시간',
+  PRIMARY KEY (`id`),
+  KEY `idx_file_id` (`file_id`),
+  KEY `idx_image_type` (`image_type`),
+  KEY `idx_created_at` (`created_at`),
+  CONSTRAINT `netcdf_images_ibfk_1` FOREIGN KEY (`file_id`) REFERENCES `netcdf_files` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='NetCDF 파일의 생성된 이미지 정보'

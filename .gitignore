@@ -1,0 +1,37 @@
+.venv/
+
+*.pyc
+__pycache__/
+
+instance/
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+dist/
+build/
+*.egg-info/
+
+.DS_Store
+
+# 이미지 파일
+images/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.ico
+*.webp
+
+# 데이터 파일
+*.nc
+
+# 로그 파일
+logs/
+
+# 설정 파일
+config.py
+
