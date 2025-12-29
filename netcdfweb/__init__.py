@@ -1,12 +1,14 @@
 import os
 
-from flask import Flask, render_template
+from flask import Flask, render_template, g
+from . import db
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY='dev',
+        UPLOAD_FOLDER=os.path.join(app.static_folder, 'ncfiles'),
         DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
     )
 
@@ -22,10 +24,24 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
+    
+    # initialize the database
+    db.init_app(app)
+
+    # register the blueprint
+    from . import nclist, nctodb
+    app.register_blueprint(nclist.bp)
+    app.register_blueprint(nctodb.bp)
 
     # a simple page that says hello
     @app.route('/')
-    def index():
+    def index():        
         return render_template("index.html")
 
     return app
+
+
+'''
+# start app command
+flask --app netcdfweb run --debug
+'''

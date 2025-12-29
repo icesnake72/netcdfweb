@@ -1,6 +1,11 @@
-create database netcdfweb;
+-- drop database if exists netcdf;
+create database netcdf;
 
+-- 기존에 테이블이 있다면 삭제부터 한다.
+DROP TABLE IF EXISTS `netcdf_images`;
+DROP TABLE IF EXISTS `netcdf_files`;
 
+-- 테이블 생성
 CREATE TABLE `netcdf_files` (
   `id` int NOT NULL AUTO_INCREMENT,
   `filename` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,

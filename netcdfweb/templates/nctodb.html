@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetCDF Web</title>
+</head>
+<body>
+    <h1>NetCDF File To Database</h1>
+    <div>
+      <div>
+        <a href="/"><p>NetCDF Home</p></a>
+      </div>
+      
+      <div>
+        <form method="post" action="/nctodb/upload" enctype="multipart/form-data">
+          <!-- directory 선택 대화상자 표시 -->
+          <input type="file" id="dirInput" name="file" accept=".nc" webkitdirectory multiple placeholder="NETCDF 파일 선택...">
+
+          <!-- 업로드 버튼 -->
+          <button type="submit" name="upload">업로드</button>
+        </form>
+      </div>
+    </div>
+
+  
+  <script>
+    //id가 dirInput인 엘리먼트(태그)를 찾아서 dirInput이라는 객체에 할당  
+    const dirInput = document.getElementById('dirInput');
+    // dirInput 객체(파일 선택 및 목록)의 내용이 변경되었으면 뒤의 함수를 실행한다
+    dirInput.addEventListener('change', (event) => {
+      // event.target.files는 파일 선택 및 Array객체에 저장.
+      const files = Array.from(event.target.files);
+      const ncFiles = files.filter(file => file.name.endsWith('.nc'));      
+      console.log(ncFiles);
+    });
+  </script>
+</body>
+</html>
