@@ -42,6 +42,13 @@ def create_app(test_config=None):
 
 
 '''
+# 가상환경 만들기
+python -m venv .venv
+.venv/scripts/activate.bat
+
+# 필요한 모듈들 설치하기
+pip install -r requirements.txt
+
 # start app command
 flask --app netcdfweb run --debug
 '''
