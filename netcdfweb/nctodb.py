@@ -238,47 +238,60 @@ def extract_netcdf_data(filename):
         }
       metadata['dimensions'] = dimension_info
       
-      # Global Variables 추출하기
+      # Global Variables 추출하기()
       global_attrs = {} # Global Variables 저장할 빈 딕셔너리 생성
-      for attr in nc.ncattrs():
-        attr_value = getattr(nc, attr)
+      for attr in nc.ncattrs(): # 모든 키(key)들에 대하여...
+        attr_value = getattr(nc, attr)  # 키명으로부터 값가져오기
         if isinstance(attr_value, (int, float, str)):   # 이러한 메타데이터이므로
-          global_attrs[attr] = str(attr_value)
+          global_attrs[attr] = str(attr_value)  # 딕셔너리에 키:밸류 형태로 저장
       metadata['global_attributes'] = global_attrs
-      
-      # 좌표계 정보 확인 : coord_vars에 해당하는 항목이 nc.variables 중에 있다면
-      # metadata['has_coordinates']은 True, 아니면 False
-      coord_vars = ['lat', 'lon', 'latitude', 'longitude', 'x', 'y']
-      metadata['has_coordinates'] = any(coord in nc.variables for coord in coord_vars)
-
-      # 위도/경도 범위 계산 — lat/latitude, lon/longitude 변수에서 최소/최대값 추출
-      lat_var_names = ['lat', 'latitude']  # 위도 변수명 후보
-      lon_var_names = ['lon', 'longitude']  # 경도 변수명 후보
-
-      for lat_name in lat_var_names:
-        if lat_name in nc.variables:
-          lat_data = nc.variables[lat_name][:]
-          # numpy masked array 처리 — 결측값 제외하고 유효한 값만 사용
-          if hasattr(lat_data, 'compressed'):
-            lat_data = lat_data.compressed()
-          if len(lat_data) > 0:
-            metadata['lat_min'] = float(np.nanmin(lat_data))
-            metadata['lat_max'] = float(np.nanmax(lat_data))
-          break
-
-      for lon_name in lon_var_names:
-        if lon_name in nc.variables:
-          lon_data = nc.variables[lon_name][:]
-          # numpy masked array 처리 — 결측값 제외하고 유효한 값만 사용
-          if hasattr(lon_data, 'compressed'):
-            lon_data = lon_data.compressed()
-          if len(lon_data) > 0:
-            metadata['lon_min'] = float(np.nanmin(lon_data))
-            metadata['lon_max'] = float(np.nanmax(lon_data))
-          break
     
   except Exception as e:
     print(f'netcdf 메타 데이터 추출중 오류가 발생했습니다: {e}')
 
   return metadata
+  
+  
+def get_coordinate_bounds(nc:netCDF4.Dataset):
+  '''
+  NetCDF 파일에서 위경도 범위 계산
+  
+  Returns:
+    dict: {
+      'lon_min': float | None,
+      'lon_max': float | None,
+      ...
+      'corner_points': list | None,
+      'center': {} 
+    }  
+  '''
+  # 반환값을 구성할 변수들 선언
+  lon_min = lon_max = lat_min = lat_max = None
+  corner_points = None
+  center_override = None
+  
+  lon = lat = None
+  
+  # nc파일에서 사용가능한 모든 변수명 리스트업
+  all_vars = list(nc.variables.keys())
+  print(f'netcdf 변수들: {all_vars}')
+  
+  lat_names = ['lat', 'latitude', 'y', 'latitude_center', 'lat_center', 'latitude_bounds', 'lat_bounds']
+  lon_names = ['lon', 'longitude', 'x', 'logitude_center', 'lon_center', 'logitude_bounds', 'lon_bounds']
+  for name in lon_names:
+    if name in nc.variables:
+      lon = nc.variables[name][:] # 리스트이고 리스트의 모든 값을 취함
+      print(f'경도 변수를 찾음: {lon}')
+      break
+    
+  for name in lat_names:
+    if name in nc.variables:
+      lat = nc.variables[name][:] # 리스트이고 리스트의 모든 값을 취함
+      print(f'위도 변수를 찾음: {lat}')
+      break
+  
+  bounds_info = (lon, lat)
+  
+  
+  
   
